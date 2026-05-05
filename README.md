@@ -1,111 +1,113 @@
 <div align="center">
-  <h1>🚀 The STM32 Bare-Metal Bible</h1>
-  <p><i>A comprehensive collection of C programming and bare-metal practice codes for STM32 microcontrollers.</i></p>
+  <h1>🚀 The Bare-Metal Embedded C Bible</h1>
+  <p><i>A comprehensive guide and code repository for mastering standard C and bare-metal programming on STM32 microcontrollers.</i></p>
 </div>
 
 ---
 
 ## 📖 About This Repository
-Welcome to the **STM32 Bare-Metal Bible**! This repository is designed to take you from the fundamentals of C programming all the way to advanced bare-metal embedded concepts. Whether you are brushing up on pointers, mastering bitwise operations for register manipulation, or exploring memory alignment, this repo has a dedicated practice code for it. 
+Welcome to the Bare-Metal Embedded C Bible! This repository is engineered to bridge the gap between basic standard C programming and advanced hardware-level embedded systems development. 
 
-The codes are structured to be hardware-agnostic at the core logic level, making it easy to run them on almost any STM32 development board.
+Instead of relying heavily on hardware abstraction layers (HAL), these practice codes dive deep into register-level manipulation, memory architecture, and core processor logic. It is structured into host-machine C exercises and target-specific STM32 firmware implementations.
 
 ---
 
-## 🗂️ Repository Structure (Source Codes)
+## 🗂️ Repository Structure
 
-The repository contains numerous modular practice folders, categorized below for your learning journey:
+The repository is divided into three main environments: Host code, Target code, and Experimental code.
 
-### 🧮 1. C Fundamentals & Math
-* `ASCII` - Understanding character encoding.
-* `Average` - Basic arithmetic and logic.
-* `math` - Core mathematical operations.
-* `constdata` - Understanding the `const` qualifier in ROM/RAM.
-* `macro` - Preprocessor directives and macros.
-* `type_casting` - Implicit and explicit type conversions.
+### 💻 1. `host/` (Core C Fundamentals)
+These folders contain standard C programs meant to be compiled and executed on your host PC. They build the foundation required for writing efficient embedded code.
 
-### 🔀 2. Control Flow & Logic
-* `ifelseBiggestOfTwo`, `ifelseCastVote`, `ifelseIfTax`, `ifstatementCastVote` - Conditional branching logic.
-* `switchCaseArea` - State machine basics using switch-case.
-* `WhileLoop1to10`, `whileLoopEvenNum` - Indefinite looping constructs.
-* `forLoopEvenNum`, `forloopNumberPyramid` - Definite looping and pattern generation.
+* **Arrays & Strings:** `arrays`, `arrays_passing`, `arrays_swap`, `strings`
+* **Pointers & Memory:** `pointer`, `pointer_1`, `pointer_2`, `var_address`, `function`
+* **Bitwise Operations (Crucial):** `bitWise2Numbers`, `bitWiseEvenOdd`, `bitWiseSet`
+* **Structs, Unions & Memory Alignment:** `structInit`, `struct_array`, `structPointer`, `structPacket`, `structPacketBitfield`, `union`, `unionBitExraction`, `dataAlignment`
+* **Control Flow & Math:** `Average`, `math`, `forLoopEvenNum`, `WhileLoop1to10`, `switchCaseArea`, `ifelseBiggestOfTwo`
+* **Embedded Specifics:** `constdata`, `macro`, `type_casting`
 
-### 📦 3. Arrays & Strings
-* `arrays` - Array initialization and memory layout.
-* `arrays_passing` - Passing arrays to functions (decaying to pointers).
-* `arrays_swap` - Manipulating array data.
-* `strings` - Character arrays and string manipulation in embedded systems.
+### 🎯 2. `target/stm32f407_disc/` (STM32 Bare-Metal Firmware)
+These projects are pure bare-metal C applications intended to be flashed onto an STM32 microcontroller. While the folder is named for the F407 Discovery, the logic is highly portable.
 
-### 🎯 4. Pointers & Memory
-* `pointer`, `pointer_1`, `pointer_2` - Pointer arithmetic, dereferencing, and memory addresses.
-* `var_address` - Inspecting variables in the memory map.
-* `function` - Function pointers and modular code.
+* `001HelloWorld` & `002Sizeof` - Basic setup and ITM debugging.
+* `003Add` - Arithmetic operations verifying processor ALUs.
+* `004led_on` & `005led_toggle` - Direct GPIO Register manipulation (ODR, MODER).
+* `006pin_read` - Reading input states from GPIO pins (IDR).
+* `007volatile` - Demonstrating the necessity of the `volatile` keyword in hardware access.
+* `008button_ISR` - Configuring NVIC and EXTI lines for hardware interrupts.
+* `009packed_Vsnonpacked` - Memory padding analysis on the ARM Cortex-M architecture.
+* `010led_toggle_bitfields` - Using C structs and bitfields to map hardware registers cleanly.
+* `011keypad` - Matrix keypad interfacing using raw GPIO state machines.
 
-### 🏗️ 5. Structures, Unions & Alignment
-* `structInit`, `struct_array`, `structPointer` - Organizing complex data types.
-* `structPacket`, `structPacketBitfield` - Creating protocol packets and bit-fields.
-* `student_record` - Real-world data organization.
-* `union`, `unionBitExtraction` - Memory sharing and extracting specific bytes/bits from registers.
-* `dataAlignment` - Understanding struct padding and memory alignment constraints on ARM Cortex-M.
+### 🦀 3. `Rust/`
+* `gussing_game` & `practice` - Experimental workspace for exploring safe systems programming using Rust and Cargo.
 
-### ⚙️ 6. Bitwise Operations (Crucial for Bare-Metal)
-* `bitWise2Numbers` - Basic AND, OR, XOR, NOT operations.
-* `bitWiseEvenOdd` - Using bitwise logic for optimization.
-* `bitWiseSet` - Setting, clearing, and toggling specific bits (Register manipulation prep).
+---
+
+## 🧠 Essential Bare-Metal Theory
+To truly utilize this repository, you must understand a few core concepts of embedded C:
+
+### 1. Bitwise Operations
+In bare-metal programming, you rarely write whole bytes to a register. You manipulate specific bits without altering others.
+* **Setting a bit:** `Register |= (1 << bit_position);`
+* **Clearing a bit:** `Register &= ~(1 << bit_position);`
+* **Toggling a bit:** `Register ^= (1 << bit_position);`
+
+### 2. The `volatile` Keyword (`007volatile`)
+Hardware registers can change state without the software's knowledge (e.g., an input pin changes from low to high). If you don't declare a hardware pointer as `volatile`, the compiler's optimizer might cache the value and ignore real-time hardware changes. It tells the compiler: *"Always fetch this value directly from memory, never optimize it away."*
+
+### 3. Structs and Bitfields (`010led_toggle_bitfields`)
+Instead of using raw hex addresses and bitwise logic, you can define a C `struct` that perfectly maps to a peripheral's memory layout. Bitfields (`uint32_t pin0 : 1;`) allow you to access single bits seamlessly: `GPIOA->ODR.pin5 = 1;`
+
+### 4. Memory Alignment (`009packed_Vsnonpacked`)
+ARM Cortex-M processors prefer fetching data aligned to 32-bit word boundaries. The compiler automatically adds "padding" bytes to structs to ensure this. In embedded systems, when transmitting structs over UART or SPI, this padding corrupts data packets. You must use compiler attributes like `__attribute__((packed))` to strip this padding.
 
 ---
 
 ## 🛠️ Hardware Requirements
-The beauty of bare-metal C is its portability. You can run these codes on almost **any STM32 board**. 
 
-**Recommended Boards:**
-* 💊 **STM32 Bluepill** (STM32F103C8T6) - The classic beginner board.
-* 💊 **STM32 Blackpill** (STM32F401CCU6 / STM32F411CEU6) - Higher performance with floating-point units.
-* 🛡️ **STM32 Nucleo Boards** (e.g., Nucleo-F446RE, Nucleo-G071RB) - Official ST boards with built-in programmers.
-* *Any other custom STM32 board.*
+This code is written at the bare-metal level, meaning the underlying C concepts are completely hardware-agnostic. You can port and run these projects on virtually **any STM32 development board**:
+
+* 💊 **STM32 Bluepill** (STM32F103C8T6) 
+* 💊 **STM32 Blackpill** (STM32F401CCU6 / STM32F411CEU6) 
+* 🛡️ **STM32 Nucleo Boards** (e.g., Nucleo-F446RE)
+* 🧭 **STM32 Discovery Boards** (e.g., STM32F407G-DISC1)
+* *Custom custom-designed PCB.*
 
 **Required Programmer:**
-* **ST-Link V2** (USB Dongle) - If using a Bluepill/Blackpill. 
-    * *Connections:* `SWDIO` -> `SWDIO`, `SWCLK` -> `SWCLK`, `GND` -> `GND`, `3.3V` -> `3.3V`.
-* *(Nucleo boards already have an ST-Link built-in!)*
+* **ST-Link V2** (USB Dongle) - Essential if using a Bluepill/Blackpill. 
+    * *Wiring:* `SWDIO` -> `SWDIO`, `SWCLK` -> `SWCLK`, `GND` -> `GND`, `3.3V` -> `3.3V`.
+* *(Nucleo and Discovery boards have an ST-Link integrated right into the board!)*
 
 ---
 
-## 💻 Software Requirements
-* [**STM32CubeIDE**](https://www.st.com/en/development-tools/stm32cubeide.html) - ST's official, free Eclipse-based IDE.
+## 🚀 How to Setup, Extract, and Flash
 
----
+We recommend using **STM32CubeIDE** (ST's official, free, Eclipse-based IDE) to compile and debug these codes.
 
-## 🚀 How to Extract and Use This Repository
+### Step 1: Download the Repository
+1. Click the **`Code`** button at the top right of this page and select **`Download ZIP`**.
+2. Extract the `.zip` file to your preferred local directory.
 
-Follow these steps to get the code running on your microcontroller:
-
-### Step 1: Download & Extract
-1. Click the **`Code`** button at the top right of this repository and select **`Download ZIP`**.
-2. Extract the `.zip` file to a known folder on your computer (e.g., `C:\STM32_Workspace`).
-
-### Step 2: Setup STM32CubeIDE
+### Step 2: Prepare STM32CubeIDE
 1. Open **STM32CubeIDE**.
-2. Create a new project: `File` -> `New` -> `STM32 Project`.
-3. Select your specific Microcontroller/Board (e.g., `STM32F411CE` for Blackpill).
-4. Give your project a name (e.g., `BareMetal_Practice`).
-5. Choose **Empty** project type (or Basic) since we are focusing on bare-metal and core C, bypassing HAL configurations if preferred.
+2. Go to `File` -> `New` -> `STM32 Project`.
+3. Select your exact Microcontroller or Development Board in the Target Selector.
+4. Name your project. 
+5. When prompted to initialize all peripherals with default settings, you can choose **No** (we are writing bare-metal code, so we don't necessarily need the HAL auto-generated files, though keeping them as a reference is fine).
 
-### Step 3: Import the Code
-1. Navigate to the extracted repository folder.
-2. Open the specific folder you want to practice (e.g., `pointer_1`).
-3. Copy the `.c` and `.h` files.
-4. Go back to STM32CubeIDE, right-click on the `Core/Src` folder of your newly created project, and click **Paste**. (Replace `main.c` if asked).
+### Step 3: Import and Run the Code
+1. Navigate to your extracted repository folder.
+2. Find the project you want to test (e.g., `target/stm32f407_disc/004led_on`).
+3. Copy the contents of the `Src` folder (usually `main.c`).
+4. In STM32CubeIDE, paste and overwrite the `main.c` file inside your project's `Core/Src/` directory.
+5. **Important Note on Porting:** If you are using a board other than the STM32F407, you will need to open the `main.c` file and update the base memory addresses (e.g., `RCC_BASE`, `GPIOA_BASE`) by referencing the Reference Manual for your specific MCU.
 
 ### Step 4: Build and Flash
-1. Click the 🔨 **Build (Hammer)** icon in the toolbar to compile the code. Ensure there are 0 errors.
-2. Connect your STM32 board via the ST-Link V2 to your computer.
-3. Click the 🐞 **Debug (Bug)** icon to flash the code onto the microcontroller.
-4. You can now step through the code line-by-line, inspect variable addresses, registers, and memory right inside the IDE!
+1. Click the 🔨 **Build (Hammer)** icon to compile the code. Ensure there are 0 errors.
+2. Connect your STM32 board to your PC (via ST-Link).
+3. Click the 🐞 **Debug (Bug)** icon. This flashes the code to the MCU and halts the processor.
+4. Click the **Resume (Play)** button, or step through the code line-by-line while inspecting peripheral registers in the IDE's SFR (Special Function Register) view!
 
 ---
-
-## 💡 Why Bare-Metal?
-Understanding bare-metal programming and the underlying C concepts (like bitwise math, pointers, and memory alignment) is what separates a library-user from a true Embedded Systems Engineer. By mastering these snippets, you are preparing yourself to write your own drivers, understand hardware reference manuals, and optimize memory on ARM Cortex-M processors.
-
-Happy Coding! ⚡
+*Maintained by Apratim Phadke*
